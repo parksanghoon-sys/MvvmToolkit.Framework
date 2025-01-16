@@ -3,10 +3,10 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Text;
-using MvvmToolkit.Core.CodeGenerator.GenInfo;
+using MvvmToolkit.Core.CodeGenerators.GenInfo;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace MvvmToolkit.Core.CodeGenerator
+namespace MvvmToolkit.Core.CodeGenerators
 {
     [Generator]
     internal class RelayCommandCodeGen : IIncrementalGenerator

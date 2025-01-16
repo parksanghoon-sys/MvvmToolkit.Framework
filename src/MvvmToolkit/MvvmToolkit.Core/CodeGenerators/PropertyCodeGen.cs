@@ -2,11 +2,11 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using MvvmToolkit.Core.CodeGenerator.GenInfo;
+using MvvmToolkit.Core.CodeGenerators.GenInfo;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace MvvmToolkit.Core.CodeGenerator
+namespace MvvmToolkit.Core.CodeGenerators
 {
     // 이 클래스는 소스 생성기(Source Generator)로, IIncrementalGenerator 인터페이스를 구현합니다.
     // 이 생성기는 특정 속성을 가진 클래스에 대해 자동으로 속성(Property) 코드를 생성합니다.
