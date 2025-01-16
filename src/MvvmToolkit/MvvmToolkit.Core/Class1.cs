@@ -1,6 +1,7 @@
-﻿namespace MvvmToolkit.Core;
-
-public class Class1
+﻿namespace MvvmToolkit.Core
 {
+    public class Class1
+    {
 
+    }
 }
