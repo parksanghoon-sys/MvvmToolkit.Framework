@@ -6,8 +6,6 @@
 		<Nullable>enable</Nullable>
 		<!--<LangVersion>preview</LangVersion>-->
 		<LangVersion>latest</LangVersion>
-		<!--<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
