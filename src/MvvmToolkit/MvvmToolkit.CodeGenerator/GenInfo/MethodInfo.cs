@@ -1,4 +1,4 @@
-﻿namespace MvvmToolkit.Core.CodeGenerators.GenInfo
+﻿namespace MvvmToolkit.CodeGenerator
 {
     internal struct MethodInfo
     {

@@ -1,34 +1,30 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using MvvmToolkit.Core.CodeGenerators.GenInfo;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Text;
+using Microsoft.CodeAnalysis.CSharp;
 
-namespace MvvmToolkit.Core.CodeGenerators
+namespace MvvmToolkit.CodeGenerator
 {
-    // 이 클래스는 소스 생성기(Source Generator)로, IIncrementalGenerator 인터페이스를 구현합니다.
-    // 이 생성기는 특정 속성을 가진 클래스에 대해 자동으로 속성(Property) 코드를 생성합니다.
     [Generator]
-    public class PropertyCodeGen : IIncrementalGenerator
+    internal class RelayCommandCodeGen : IIncrementalGenerator
     {
-        // 생성기의 초기화를 담당하는 메서드입니다.
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            // 클래스 선언을 필터링하고 변환하는 구문 제공자를 생성합니다.
             var classDeclarations = context.SyntaxProvider
-                                           .CreateSyntaxProvider(predicate: static (s, _) => PropertyCodeGen.IsSyntaxForCodeGen(s),
-                                                                 transform: static (ctx, _) => PropertyCodeGen.GetTargetForCodeGen(ctx))
+                                           .CreateSyntaxProvider(predicate: static (s, _) => RelayCommandCodeGen.IsSyntaxForCodeGen(s),
+                                                                 transform: static (ctx, _) => RelayCommandCodeGen.GetTargetForCodeGen(ctx))
                                            .Where(x => x != null);
 
-            // 컴파일과 클래스 선언을 결합하여 소스 출력을 등록합니다.
+
             IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax>)> compilationAndClass = context.CompilationProvider.Combine(classDeclarations.Collect());
-            context.RegisterSourceOutput(compilationAndClass, static (spc, source) => PropertyCodeGen.PropertyCodeExecute(source.Item1, source.Item2, spc));
+            context.RegisterSourceOutput(compilationAndClass, static (spc, source) => RelayCommandCodeGen.RelayCommandCodeExecute(source.Item1, source.Item2, spc));
         }
 
+
+
         #region Filter
-        // 코드 생성을 위한 구문인지 확인하는 메서드입니다.
         internal static bool IsSyntaxForCodeGen(SyntaxNode node)
         {
             if (node is not ClassDeclarationSyntax) return false;
@@ -38,10 +34,10 @@ namespace MvvmToolkit.Core.CodeGenerators
             return true;
         }
 
-        // 코드 생성을 위한 대상 클래스를 반환하는 메서드입니다.
         internal static ClassDeclarationSyntax GetTargetForCodeGen(GeneratorSyntaxContext context)
         {
             var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
+
 
             foreach (var memeberSyntax in classDeclarationSyntax.Members)
             {
@@ -55,19 +51,20 @@ namespace MvvmToolkit.Core.CodeGenerators
                         }
                         INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
                         string fullName = attributeContainingTypeSymbol.ToDisplayString();
-                        if (fullName == "MvvmToolkit.Core.Attributes.PropertyAttribute")
+                        if (fullName == "MvvmToolkit.Core.Attributes.RelayCommandAttribute")
                         {
                             return classDeclarationSyntax;
                         }
                     }
                 }
             }
+
+
             return null;
         }
         #endregion
 
         #region Generator
-        // 클래스의 네임스페이스를 가져오는 메서드입니다.
         internal static string GetNamespace(Compilation compilation, MemberDeclarationSyntax cls)
         {
             var model = compilation.GetSemanticModel(cls.SyntaxTree);
@@ -80,17 +77,19 @@ namespace MvvmToolkit.Core.CodeGenerators
             return "";
         }
 
-        // 클래스의 필드 목록을 가져오는 메서드입니다.
-        internal static List<AutoFieldInfo> GetFieldList(Compilation compilation, MemberDeclarationSyntax cls)
+        internal static List<MethodInfo> GetMethodList(Compilation compilation, MemberDeclarationSyntax cls)
         {
-            List<AutoFieldInfo> fieldList = new List<AutoFieldInfo>();
-
+            List<MethodInfo> methodList = new List<MethodInfo>();
             var model = compilation.GetSemanticModel(cls.SyntaxTree);
-
-            foreach (FieldDeclarationSyntax field in cls.DescendantNodes().OfType<FieldDeclarationSyntax>())
+            foreach (MethodDeclarationSyntax method in cls.DescendantNodes().OfType<MethodDeclarationSyntax>())
             {
-                bool found = false;
-                foreach (AttributeListSyntax attributeListSyntax in field.AttributeLists)
+
+                var returnType = method.ReturnType.ToString();
+                if (returnType != "void") continue;
+
+
+                bool detection = false;
+                foreach (AttributeListSyntax attributeListSyntax in method.AttributeLists)
                 {
                     foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
                     {
@@ -98,37 +97,43 @@ namespace MvvmToolkit.Core.CodeGenerators
                         {
                             continue;
                         }
+
                         INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
                         string fullName = attributeContainingTypeSymbol.ToDisplayString();
-                        if (fullName == "MvvmToolkit.Core.Attributes.PropertyAttribute")
+                        if (fullName == "MvvmToolkit.Core.Attributes.RelayCommandAttribute")
                         {
-                            found = true;
+                            detection = true;
                             break;
                         }
                     }
-
-                    if (found == true) break;
                 }
 
-                if (found == false) continue;
+                if (detection == false) continue;
 
-                foreach (var item in field.Declaration.Variables)
+
+                switch (method.ParameterList.Parameters.Count)
                 {
-                    AutoFieldInfo info = new AutoFieldInfo
-                    {
-                        Identifier = item.Identifier.ValueText,
-                        TypeName = field.Declaration.Type.ToString()
-                    };
-
-                    fieldList.Add(info);
+                    case 0:
+                        methodList.Add(new MethodInfo()
+                        {
+                            MethodName = method.Identifier.ToString(),
+                            ArgumentType = "",
+                        });
+                        break;
+                    case 1:
+                        methodList.Add(new MethodInfo()
+                        {
+                            MethodName = method.Identifier.ToString(),
+                            ArgumentType = method.ParameterList.Parameters[0].Type.ToString(),
+                        });
+                        break;
                 }
             }
 
-            return fieldList;
+            return methodList;
         }
 
-        // 실제로 속성 코드를 생성하는 메서드입니다.
-        internal static void PropertyCodeExecute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, SourceProductionContext context)
+        internal static void RelayCommandCodeExecute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, SourceProductionContext context)
         {
             if (classes.IsDefaultOrEmpty)
             {
@@ -138,7 +143,7 @@ namespace MvvmToolkit.Core.CodeGenerators
             IEnumerable<ClassDeclarationSyntax> distinctClasses = classes.Distinct();
             foreach (var cls in distinctClasses)
             {
-                // 모든 패키지를 임포트합니다.
+                // Import all the packages
                 var usingDirectives = cls.SyntaxTree.GetCompilationUnitRoot().Usings;
                 var usingDeclaration = new StringBuilder($@"{usingDirectives}");
 
@@ -153,7 +158,6 @@ namespace MvvmToolkit.Core.CodeGenerators
                                                                DiagnosticSeverity.Error,
                                                                true);
                     context.ReportDiagnostic(Diagnostic.Create(description, Location.None));
-                    return;
                 }
 
                 if (cls.BaseList == null)
@@ -177,67 +181,77 @@ namespace MvvmToolkit.Core.CodeGenerators
                                            DiagnosticSeverity.Error,
                                            true);
                     context.ReportDiagnostic(Diagnostic.Create(description, Location.None));
-                    return;
                 }
-                List<AutoFieldInfo> fieldList = GetFieldList(compilation, cls);
-                if (fieldList.Count == 0) continue;
 
-                foreach (var field in fieldList)
-                {
-                    if (field.Identifier.StartsWith("_") == true) continue;
-                    var description = new DiagnosticDescriptor("MvvmToolkit0003",
-                                                               "Property should start with _ character",
-                                                               $"{clsNamespace}.{cls.Identifier.ValueText} class have wrong property : {field.Identifier}",
-                                                               "Problem",
-                                                               DiagnosticSeverity.Error,
-                                                               true);
-                    context.ReportDiagnostic(Diagnostic.Create(description, Location.None));
-                    return;
-                }
+                List<MethodInfo> methodList = GetMethodList(compilation, cls);
+                if (methodList.Count == 0) continue;
 
                 var source = """
-                    {using}
+                {using}
+                using MvvmToolkit.Core.Commands;
+                using System.Windows.Input;
 
-                    namespace {clsNamespace}{
-                        partial class {clsName}{
-                    
-                    {fieldCollection}
-                            
-                        }
+                namespace {clsNamespace}{
+                    partial class {clsName}{
+                
+                {methodCollection}
+                        
                     }
-                    """;
-
-                source = source.Replace("{clsNamespace}", clsNamespace);
-                source = source.Replace("{clsName}", cls.Identifier.ValueText);
+                }
+                """;
 
                 var propertyCodeGroup = "";
-                foreach (var field in fieldList)
+                foreach (var method in methodList)
                 {
-                    string propertyCode = """
+                    if (method.ArgumentType == "")
+                    {
+                        string propertyCode = """
 
-                                    public {typeName} {fieldName}{
-                                        get => {_fieldName};
-                                        set => SetProperty(ref {_fieldName}, value);
+                                public ICommand _{methodName}Command = null;
+                                public ICommand {methodName}Command{
+                                    get{
+                                        _{methodName}Command = new RelayCommand(()=> this.{methodName}());
+                                        return _{methodName}Command;
                                     }
+                                }
 
                         """;
 
-                    propertyCode = propertyCode.Replace("{typeName}", field.TypeName);
-                    propertyCode = propertyCode.Replace("{_fieldName}", field.Identifier);
+                        propertyCode = propertyCode.Replace("{methodName}", method.MethodName);
+                        propertyCodeGroup += propertyCode;
+                    }
+                    else
+                    {
+                        string propertyCode = """
 
-                    var fieldName = field.Identifier;
-                    fieldName = fieldName.Remove(0, 1);
-                    fieldName = char.ToUpper(fieldName[0]) + fieldName.Substring(1);
-                    propertyCode = propertyCode.Replace("{fieldName}", fieldName);
-                    propertyCodeGroup += propertyCode;
+                                public ICommand _{methodName}Command = null;
+                                public ICommand {methodName}Command{
+                                    get{
+                                        _{methodName}Command = new RelayCommand<{arg}>((arg)=> this.{methodName}(arg));
+                                        return _{methodName}Command;
+                                    }
+                                }
+
+                        """;
+
+                        propertyCode = propertyCode.Replace("{methodName}", method.MethodName);
+                        propertyCode = propertyCode.Replace("{arg}", method.ArgumentType);
+                        propertyCodeGroup += propertyCode;
+                    }
+
                 }
 
                 source = source.Replace("{using}", usingDeclaration.ToString());
-                source = source.Replace("{fieldCollection}", propertyCodeGroup);
+                source = source.Replace("{methodCollection}", propertyCodeGroup);
+                source = source.Replace("{clsNamespace}", clsNamespace);
+                source = source.Replace("{clsName}", cls.Identifier.ValueText);
+                source = source.Replace("{methodCollection}", propertyCodeGroup);
 
                 context.AddSource($"{clsNamespace}.{cls.Identifier.ValueText}.g.cs", SourceText.From(source, Encoding.UTF8));
+
             }
         }
         #endregion
+
     }
 }

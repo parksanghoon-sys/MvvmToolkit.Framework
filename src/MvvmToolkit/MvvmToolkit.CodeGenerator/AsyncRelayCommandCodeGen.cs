@@ -4,9 +4,8 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
-using MvvmToolkit.Core.CodeGenerators.GenInfo;
 
-namespace MvvmToolkit.Core.CodeGenerators
+namespace MvvmToolkit.CodeGenerator
 {
     [Generator]
     internal class AsyncRelayCommandCodeGen : IIncrementalGenerator
