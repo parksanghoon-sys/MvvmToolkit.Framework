@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace WpfCore.Test
 {
-    public partial class MainViewModel : ViewModelBase
+    public partial class MainViewModel : NotifyPropertyChangeObject
     {
         [Property]
         private string _name;

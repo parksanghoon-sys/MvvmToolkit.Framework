@@ -3,8 +3,12 @@ using System.Runtime.CompilerServices;
 
 namespace MvvmToolkit.Core.Components
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class NotifyPropertyChangeObject : INotifyPropertyChanged, INotifyPropertyChanging
     {
+        /// <summary>
+        /// Occurs when a property value is changing.
+        /// </summary>
+        public event PropertyChangingEventHandler? PropertyChanging;
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
