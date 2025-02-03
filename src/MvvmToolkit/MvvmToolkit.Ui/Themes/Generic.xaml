@@ -1,0 +1,9 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:MvvmToolkit.Ui">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MvvmToolkit.Ui;component/Themes/Theme/Dark.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MvvmToolkit.Ui;component/Themes/Theme/Light.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

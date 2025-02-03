@@ -1,12 +1,17 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MvvmToolkit.App.Helper;
+using MvvmToolkit.App.Logs;
 using System;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
+using System.Xml.Linq;
 
 namespace MvvmToolkit.App
 {
@@ -41,11 +46,52 @@ namespace MvvmToolkit.App
         }
         protected GenericHostApplication()
         {
+            var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder();
+            Host = builder
+              //.UseDefaultServiceProvider(ConfigureServiceProvider)
+              .ConfigureAppConfiguration(ConfigureAppConfiguration)
+              //.ConfigureLogging(ConfigureLogging)
+              .ConfigureServices(ConfigureServices)
+              .Build();
+
+            ContainerProvider.Initialize(Host.Services);
+
             Dispatcher.UnhandledException += Dispatcher_UnhandledException;
             Dispatcher.UnhandledExceptionFilter += Dispatcher_UnhandledExceptionFilter;
 
             ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
+
+        private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        {
+            // "LogOptions" 섹션을 IOptions 패턴으로 등록
+            services.Configure<LogOptions>(context.Configuration.GetSection("LogOptions"));
+
+            // CustomLoggerProvider를 싱글톤으로 등록
+            services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
+
+            // 로깅 시스템에 CustomLoggerProvider 추가
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders(); // 기본 로거 제거 (선택 사항)
+                logging.AddProvider(new CustomLoggerProvider(context.Configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions()));
+            });            
+        }
+
+        private void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
+        {
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            // 구성 정보를 빌드하여 IConfiguration 객체를 생성합니다.
+            IConfiguration configuration = builder.Build();
+
+            // "LogOptions" 섹션을 LogOptions 클래스에 바인딩합니다.
+            var logOptions = configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions();
+
+        }
+
         /// <summary>
         /// Dispatchers the unhandled exception filter using the specified sender.
         /// </summary>
@@ -88,6 +134,29 @@ namespace MvvmToolkit.App
             {
                 // ignored
             }
+        }
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
+                .Build();
+            // LogOptions 섹션을 읽어 LogOptions 객체에 바인딩합니다.
+            var logOptions = configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions();
+
+            // DI 컨테이너 설정
+            var serviceProvider = Host.Services.
+                .AddSingleton<IConfiguration>(configuration)
+                .AddSingleton(logOptions)
+                // CustomLoggerProvider 등록 (필요에 따라 싱글톤이나 다른 수명 주기로 등록)
+                .AddSingleton<ILoggerProvider>(sp => new CustomLoggerProvider(sp.GetRequiredService<LogOptions>()))
+                // 로깅 시스템에 CustomLoggerProvider 추가
+                .AddLogging(builder => builder.AddProvider(new CustomLoggerProvider(logOptions)))
+                .BuildServiceProvider();
+
+            Services = serviceProvider;
+
+            base.OnStartup(e);
         }
     }
 }

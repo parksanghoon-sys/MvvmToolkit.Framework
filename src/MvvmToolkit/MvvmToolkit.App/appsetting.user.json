@@ -1,0 +1,8 @@
+{
+  "LogOptions": {
+    "LogToConsole": true,
+    "LogToFile": true,
+    "FilePath": "app_logs.txt",
+    "MinimumLogLevel": "Debug"
+  }
+}
