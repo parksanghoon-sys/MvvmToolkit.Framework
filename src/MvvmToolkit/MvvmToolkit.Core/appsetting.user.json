@@ -1,0 +1,8 @@
+{
+  "Logging": {
+    "OutputType": "File",
+    "FilePath": "logs/app.log",
+    "TcpHost": "localhost",
+    "TcpPort": 5000
+  }
+}

@@ -3,15 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MvvmToolkit.App.Helper;
-using MvvmToolkit.App.Logs;
+using MvvmToolkit.Core.Logs;
 using System;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
-using System.Xml.Linq;
 
 namespace MvvmToolkit.App
 {
@@ -65,17 +63,17 @@ namespace MvvmToolkit.App
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             // "LogOptions" 섹션을 IOptions 패턴으로 등록
-            services.Configure<LogOptions>(context.Configuration.GetSection("LogOptions"));
+            services.Configure<LoggerOptions>(context.Configuration.GetSection("Logging"));
 
             // CustomLoggerProvider를 싱글톤으로 등록
-            services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
-
+            services.AddSingleton<ILoggerFactory, CustomLoggerFactory>();
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             // 로깅 시스템에 CustomLoggerProvider 추가
-            services.AddLogging(logging =>
-            {
-                logging.ClearProviders(); // 기본 로거 제거 (선택 사항)
-                logging.AddProvider(new CustomLoggerProvider(context.Configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions()));
-            });            
+            //services.AddLogging(logging =>
+            //{
+            //    logging.ClearProviders(); // 기본 로거 제거 (선택 사항)
+            //    logging.AddProvider(new CustomLoggerProvider(context.Configuration.GetSection("Logging").Get<LogOptions>() ?? new LogOptions()));
+            //});            
         }
 
         private void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
@@ -86,9 +84,6 @@ namespace MvvmToolkit.App
 
             // 구성 정보를 빌드하여 IConfiguration 객체를 생성합니다.
             IConfiguration configuration = builder.Build();
-
-            // "LogOptions" 섹션을 LogOptions 클래스에 바인딩합니다.
-            var logOptions = configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions();
 
         }
 
