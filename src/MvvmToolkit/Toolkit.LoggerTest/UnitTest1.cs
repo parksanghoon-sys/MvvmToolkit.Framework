@@ -6,16 +6,23 @@ using System.Text;
 
 namespace Toolkit.LoggerTest
 {
-    public class UnitTest1
+    class A
     {
-        [Fact]
-        public void Test1()
-        {
-
-        }
+        public int a;
     }
+
     public class CustomLoggerTests : IDisposable
     {
+        public CustomLoggerTests()
+        {
+            A classA = new A();
+            classA.a = 10;
+
+            A classB = classA;
+            classB.a = 20;
+
+            Console.WriteLine(classA.a);
+        }
         private readonly string _testFilePath = "test_log.txt";
 
         public void Dispose()
@@ -43,6 +50,10 @@ namespace Toolkit.LoggerTest
         [Fact]
         public void ConsoleLogging_WritesToConsole()
         {
+            string a = "ABC";
+            string  b =  a;
+            b = "B";
+            Console.WriteLine(a);
             // Arrange
             var logger = CreateLogger(LogOutputType.Console);
             var output = new StringWriter();
