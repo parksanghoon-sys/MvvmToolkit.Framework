@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MvvmToolkit.App.Extention;
 using MvvmToolkit.App.Helper;
 using MvvmToolkit.Core.Logs;
 using System;
@@ -13,7 +14,7 @@ using System.Windows.Threading;
 
 namespace MvvmToolkit.App
 {
-    public abstract class GenericHostApplication : Application
+    public abstract partial class GenericHostApplication : Application
     {
         private static IHost? Host { get; set; }
         private ILogger<GenericHostApplication>? _logger;
@@ -64,16 +65,10 @@ namespace MvvmToolkit.App
         {
             // "LogOptions" 섹션을 IOptions 패턴으로 등록
             services.Configure<LoggerOptions>(context.Configuration.GetSection("Logging"));
-
             // CustomLoggerProvider를 싱글톤으로 등록
             services.AddSingleton<ILoggerFactory, CustomLoggerFactory>();
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-            // 로깅 시스템에 CustomLoggerProvider 추가
-            //services.AddLogging(logging =>
-            //{
-            //    logging.ClearProviders(); // 기본 로거 제거 (선택 사항)
-            //    logging.AddProvider(new CustomLoggerProvider(context.Configuration.GetSection("Logging").Get<LogOptions>() ?? new LogOptions()));
-            //});            
+            services.AddThemeService();          
         }
 
         private void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
@@ -131,26 +126,8 @@ namespace MvvmToolkit.App
             }
         }
         protected override void OnStartup(StartupEventArgs e)
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
-                .Build();
-            // LogOptions 섹션을 읽어 LogOptions 객체에 바인딩합니다.
-            var logOptions = configuration.GetSection("LogOptions").Get<LogOptions>() ?? new LogOptions();
-
-            // DI 컨테이너 설정
-            var serviceProvider = Host.Services.
-                .AddSingleton<IConfiguration>(configuration)
-                .AddSingleton(logOptions)
-                // CustomLoggerProvider 등록 (필요에 따라 싱글톤이나 다른 수명 주기로 등록)
-                .AddSingleton<ILoggerProvider>(sp => new CustomLoggerProvider(sp.GetRequiredService<LogOptions>()))
-                // 로깅 시스템에 CustomLoggerProvider 추가
-                .AddLogging(builder => builder.AddProvider(new CustomLoggerProvider(logOptions)))
-                .BuildServiceProvider();
-
-            Services = serviceProvider;
-
+        {                                          
+         
             base.OnStartup(e);
         }
     }

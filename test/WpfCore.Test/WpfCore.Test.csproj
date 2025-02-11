@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>	  
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\MvvmToolkit\MvvmToolkit.App\MvvmToolkit.App.csproj" />
     <ProjectReference Include="..\..\src\MvvmToolkit\MvvmToolkit.CodeGenerator\MvvmToolkit.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
   </ItemGroup>
 

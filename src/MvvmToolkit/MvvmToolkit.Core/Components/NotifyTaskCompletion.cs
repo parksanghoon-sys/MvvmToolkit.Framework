@@ -1,9 +1,4 @@
-﻿using MvvmToolkit.Core.Logs;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace MvvmToolkit.Core.Components
 {
