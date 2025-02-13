@@ -20,6 +20,23 @@ namespace MvvmToolkit.App
         private ILogger<GenericHostApplication>? _logger;
         private bool _canGenerateDump;
         private CoreDumpHelper.MiniDumpType _dumpType = CoreDumpHelper.MiniDumpType.MiniDumpNormal;
+        protected GenericHostApplication()
+        {
+            var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder();
+            Host = builder
+              //.UseDefaultServiceProvider(ConfigureServiceProvider)
+              .ConfigureAppConfiguration(ConfigureAppConfiguration)
+              //.ConfigureLogging(ConfigureLogging)
+              .ConfigureServices(ConfigureServices)
+              .Build();
+
+            ContainerProvider.Initialize(Host.Services);
+
+            Dispatcher.UnhandledException += Dispatcher_UnhandledException;
+            Dispatcher.UnhandledExceptionFilter += Dispatcher_UnhandledExceptionFilter;
+
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+        }
         /// <summary>
         /// Dump가 발생했을때 덤프를 저장할 위치를 얻어옵니다.
         /// </summary>
@@ -43,24 +60,11 @@ namespace MvvmToolkit.App
             _canGenerateDump = canGenerateDump;
             _dumpType = dumpType;
         }
-        protected GenericHostApplication()
-        {
-            var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder();
-            Host = builder
-              //.UseDefaultServiceProvider(ConfigureServiceProvider)
-              .ConfigureAppConfiguration(ConfigureAppConfiguration)
-              //.ConfigureLogging(ConfigureLogging)
-              .ConfigureServices(ConfigureServices)
-              .Build();
-
-            ContainerProvider.Initialize(Host.Services);
-
-            Dispatcher.UnhandledException += Dispatcher_UnhandledException;
-            Dispatcher.UnhandledExceptionFilter += Dispatcher_UnhandledExceptionFilter;
-
-            ShutdownMode = ShutdownMode.OnMainWindowClose;
-        }
-
+       /// <summary>
+       /// Service 등록
+       /// </summary>
+       /// <param name="context"></param>
+       /// <param name="services"></param>
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             // "LogOptions" 섹션을 IOptions 패턴으로 등록
@@ -70,7 +74,11 @@ namespace MvvmToolkit.App
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             services.AddThemeService();          
         }
-
+        /// <summary>
+        /// Config 관련 설정
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="builder"></param>
         private void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
         {
             builder.SetBasePath(Directory.GetCurrentDirectory())
