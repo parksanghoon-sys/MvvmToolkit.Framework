@@ -25,7 +25,6 @@ namespace MvvmToolkit.CodeGenerator
             IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax>)> compilationAndClass = context.CompilationProvider.Combine(classDeclarations.Collect());
             context.RegisterSourceOutput(compilationAndClass, static (spc, source) => PropertyCodeGen.PropertyCodeExecute(source.Item1, source.Item2, spc));
         }
-
         #region Filter
         // 코드 생성을 위한 구문인지 확인하는 메서드입니다.
         internal static bool IsSyntaxForCodeGen(SyntaxNode node)

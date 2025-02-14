@@ -22,9 +22,6 @@ namespace MvvmToolkit.CodeGenerator
             IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax>)> compilationAndClass = context.CompilationProvider.Combine(classDeclarations.Collect());
             context.RegisterSourceOutput(compilationAndClass, static (spc, source) => AsyncRelayCommandCodeGen.RelayCommandCodeExecute(source.Item1, source.Item2, spc));
         }
-
-
-
         #region Filter
         internal static bool IsSyntaxForCodeGen(SyntaxNode node)
         {
