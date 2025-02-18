@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfCore.Test", "..\..\test\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmToolkit.App", "MvvmToolkit.App\MvvmToolkit.App.csproj", "{FADC7108-313C-40C2-ABF0-08BD56B97220}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.LoggerTest", "Toolkit.LoggerTest\Toolkit.LoggerTest.csproj", "{E87DD0A6-877B-4C78-86BC-5289FF87B271}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.Test", "Toolkit.LoggerTest\Toolkit.Test.csproj", "{E87DD0A6-877B-4C78-86BC-5289FF87B271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
