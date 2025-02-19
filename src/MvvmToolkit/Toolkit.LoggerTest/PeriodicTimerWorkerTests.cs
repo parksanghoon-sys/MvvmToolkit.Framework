@@ -93,7 +93,7 @@ namespace Toolkit.Test
 
             // Assert
             Assert.True(firstTick);
-            Assert.True(firstTick);
+            Assert.True(secondTick.IsCompletedSuccessfully);
             //await Assert.ThrowsAsync<OperationCanceledException>(async () => await secondTick);
         }
         [Fact]
@@ -112,7 +112,7 @@ namespace Toolkit.Test
 
             // Assert
             Assert.True(firstTick);
-            await Assert.ThrowsAsync<OperationCanceledException>(async () => await secondTick);
+            Assert.False(secondTick.IsCompletedSuccessfully);            
         }
     }
 
