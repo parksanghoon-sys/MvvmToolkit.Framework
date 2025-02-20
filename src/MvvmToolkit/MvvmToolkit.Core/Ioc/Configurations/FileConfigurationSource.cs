@@ -1,4 +1,5 @@
 ﻿using MvvmToolkit.Core.Ioc.FileProvider;
+using MvvmToolkit.Core.Ioc.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -20,6 +21,10 @@ namespace MvvmToolkit.Core.Ioc.Configurations
         public int ReloadDelay { get; set; } = 250;
         public Action<FileLoadExceptionContext>? OnLoadException { get; set; }
         public abstract IConfigurationProvider Build(IConfigurationBuilder builder);
+        public void EnsureDefault(IConfigurationBuilder builder)
+        {
+            FileProvider ??= builder.GetFileProvider();            
+        }
 
     }
     /// <summary>
