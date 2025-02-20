@@ -2,17 +2,17 @@
 
 namespace MvvmToolkit.Core.Ioc
 {
-    public sealed class ServiceContainer : IServiceContainer
+    public sealed class ServiceContainer2 : IServiceContainer2
     {
-        private static ServiceContainer _instance;
-        private readonly IServiceCollection _serviceCollection;
+        private static ServiceContainer2 _instance;
+        private readonly IServiceCollection2 _serviceCollection;
         private readonly Dictionary<Type, object> _createObjects = new Dictionary<Type, object>();
         private static readonly object _lock = new object();
-        private ServiceContainer(IServiceCollection serviceCollection)
+        private ServiceContainer2(IServiceCollection serviceCollection)
         {
             _serviceCollection = serviceCollection ?? throw new InvalidOperationException("Invalid service collection");
         }
-        public static ServiceContainer Instance(IServiceCollection serviceCollection = null)
+        public static ServiceContainer2 Instance(IServiceCollection2 serviceCollection = null)
         {
             if (_instance == null)
             {
@@ -20,7 +20,7 @@ namespace MvvmToolkit.Core.Ioc
                 {
                     if (_instance == null)
                     {
-                        _instance = new ServiceContainer(serviceCollection);
+                        _instance = new ServiceContainer2(serviceCollection);
                     }
                 }
             }

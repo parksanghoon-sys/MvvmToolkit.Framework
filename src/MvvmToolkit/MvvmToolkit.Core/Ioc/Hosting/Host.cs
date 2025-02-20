@@ -1,6 +1,5 @@
 ﻿
-
-using Microsoft.Extensions.Configuration;
+using MvvmToolkit.Core.Ioc.Configurations;
 
 namespace MvvmToolkit.Core.Ioc.Hosting
 {
