@@ -1,5 +1,7 @@
 ﻿
 
+using MvvmToolkit.Core.Ioc.Primitives;
+
 namespace MvvmToolkit.Core.Ioc.Configurations
 {
     /// <summary>

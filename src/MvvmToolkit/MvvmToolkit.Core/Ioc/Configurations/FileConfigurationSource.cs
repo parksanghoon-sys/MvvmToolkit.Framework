@@ -40,8 +40,6 @@ namespace MvvmToolkit.Core.Ioc.Configurations
         /// <param name="source">The source settings.</param>
         public FileConfigurationProvider(FileConfigurationSource source)
         {
-            ThrowHelper.ThrowIfNull(source);
-
             Source = source;
 
             if (Source.ReloadOnChange && Source.FileProvider != null)
@@ -177,34 +175,6 @@ namespace MvvmToolkit.Core.Ioc.Configurations
         protected virtual void Dispose(bool disposing)
         {
             _changeTokenRegistration?.Dispose();
-        }
-    }
-    public abstract class ConfigurationProvider : IConfigurationProvider
-    {
-        private 
-        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IChangeToken GetReloadToken()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Load()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Set(string key, string? value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGet(string key, out string? value)
-        {
-            throw new NotImplementedException();
         }
     }
 }
