@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MvvmToolkit.Core.Ioc.Configurations.Json
 {
-    public class JsonStreamConfigurationSource : StreamConfigurationSource
+    public class JsonConfigurationSource : FileConfigurationSource
     {
         /// <summary>
         /// Builds the <see cref="JsonStreamConfigurationProvider"/> for this source.
@@ -20,7 +20,7 @@ namespace MvvmToolkit.Core.Ioc.Configurations.Json
         /// Initializes a new instance.
         /// </summary>
         /// <param name="source">The <see cref="JsonStreamConfigurationSource"/>.</param>
-        public JsonStreamConfigurationProvider(JsonStreamConfigurationSource source)
+        public JsonStreamConfigurationProvider(JsonConfigurationSource source)
             : base(source)
         {
         }

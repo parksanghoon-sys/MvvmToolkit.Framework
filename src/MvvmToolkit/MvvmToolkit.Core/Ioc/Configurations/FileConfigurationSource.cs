@@ -23,9 +23,29 @@ namespace MvvmToolkit.Core.Ioc.Configurations
         public abstract IConfigurationProvider Build(IConfigurationBuilder builder);
         public void EnsureDefault(IConfigurationBuilder builder)
         {
-            FileProvider ??= builder.GetFileProvider();            
+            FileProvider ??= builder.GetFileProvider();
+            // OnLoadException ??= builder.GetFileLoadExceptionHandler();
         }
+        public void ResolveFileProvider()
+        {
+            if (FileProvider is null && string.IsNullOrEmpty(Path) == false && System.IO.Path.IsPathRooted(Path))
+            {
+                string? directory = System.IO.Path.GetDirectoryName(Path);
+                string? pathToFile = System.IO.Path.GetFileName(Path);
 
+                while(string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
+                {
+                    pathToFile = System.IO.Path.Combine(System.IO.Path.GetFileName(directory), pathToFile);
+                    directory = System.IO.Path.GetDirectoryName(directory);
+                }
+                if (Directory.Exists(directory))
+                {
+                    FileProvider = new PhysicalFileProvider(directory);
+                    Path = pathToFile;
+                }
+            }
+            
+        }
     }
     /// <summary>
     /// Base class for file based <see cref="ConfigurationProvider"/>.

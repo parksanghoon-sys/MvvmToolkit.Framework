@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MvvmToolkit.Core.Ioc.Primitives;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
